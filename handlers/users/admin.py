@@ -10,6 +10,7 @@ import gspread
 from components.functions import  check_user_status
 from environs import Env
 from aiogram.fsm.context import FSMContext
+from components.datetime import get_tashkent_time
 from components.credentials import GOOGLE_CREDENTIALS, SCOPES
 from aiogram.fsm.state import State, StatesGroup
 from loader import bot
@@ -63,7 +64,7 @@ async def university_statistics(message: types.Message):
     data_rows = all_records[1:] if len(all_records) > 0 else []
     
     # Get current date
-    current_date = datetime.now()
+    current_date = get_tashkent_time()
     
     # Calculate statistics
     today_count = 0

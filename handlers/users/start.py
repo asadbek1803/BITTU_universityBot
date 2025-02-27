@@ -10,6 +10,7 @@ from keyboards.reply.admin import admin_buttons
 from datetime import datetime
 from components.credentials import GOOGLE_CREDENTIALS, SCOPES
 import gspread
+from components.datetime import get_tashkent_time
 from components.functions import check_user_exists, check_user_status
 from states.registration import RegistrationState
 from google.oauth2.service_account import Credentials
@@ -63,7 +64,7 @@ async def fullname_received(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     username = message.from_user.username or "Noma'lum"
     full_name = message.text
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Datetime obyektini string formatga o‘tkazamiz
+    created_at = get_tashkent_time().strftime("%Y-%m-%d %H:%M:%S")  # Datetime obyektini string formatga o‘tkazamiz
     is_admin = "False"
 
     # Oldindan saqlangan telefon raqamini olish

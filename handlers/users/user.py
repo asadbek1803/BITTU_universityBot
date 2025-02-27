@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 from datetime import datetime
 import gspread
 from components.functions import get_user_info, get_user_student
+from components.datetime import get_tashkent_time
 from environs import Env
 from components.credentials import GOOGLE_CREDENTIALS, SCOPES
 from states.users import SettingsStates
@@ -37,7 +38,7 @@ async def user_check_in(message: types.Message):
         await message.answer("⛔ Siz davomatga yozila olmaysiz yoki admin tasdiqlovi kutilmoqda...")
         return
     
-    now = datetime.now()
+    now = get_tashkent_time()
     today_date = now.strftime("%Y-%m-%d")  # YYYY-MM-DD format
     arrival_time = now.strftime("%H:%M")  # Current time (hour:minute)
     full_time = f"{today_date} {arrival_time}"
@@ -65,7 +66,7 @@ async def user_check_in(message: types.Message):
 async def user_check_out(message: types.Message):
     worksheet = client.open("CRM").worksheet("Attends")
     telegram_id = str(message.from_user.id)
-    now = datetime.now()
+    now = get_tashkent_time()
     today_date = now.strftime("%Y-%m-%d")
     check_out_time = now.strftime("%H:%M")  # Current time (hour:minute)
     full_time = f"{today_date} {check_out_time}"
@@ -152,7 +153,7 @@ async def user_statistics(message: types.Message):
     user_records = [row for row in data_rows if len(row) > 1 and row[1] == telegram_id]
     
     # Get current month and year
-    current_date = datetime.now()
+    current_date = get_tashkent_time()
     current_month = current_date.month
     current_year = current_date.year
     
