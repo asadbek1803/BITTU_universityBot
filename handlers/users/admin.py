@@ -52,16 +52,37 @@ async def get_crm_link_handler(message: types.Message):
         await message.answer("❌ CRM havolasi topilmadi. Iltimos, administrator bilan bog‘laning.")
 
 
-@router.message(lambda message: message.text == "🔗 Kanal qo'shish")
-async def add_channel_for_subscribe(message: types.Message):
-    channels = client.open("CRM").worksheet("Channels")
-    await message.answer(text="🌐Kanal usernameini yuboring \n\n\nMisol uchun @None\n\n⚠️Kanalni linkini kiritishdan oldin kanalga admin sifatida qo'shin!")
-    data = message.text
 
-    channels.add_rows([data])
+class ChannelAddState(StatesGroup):
+    waiting_for_channel = State()
 
-    await bot.send_message(chat_id=message.from_user.id, text = "✅ Kanal muvaffiqiyatli saqlandi")
+@router.message(lambda message: message.text == "🔗 Kanal qo'shish")  # "/add_channel" buyrug‘i bilan ishga tushadi
+async def add_channel_command(message: types.Message, state: FSMContext):
+    await message.answer(
+        "🌐 Kanal username'ini yuboring (Masalan: `@YourChannel`)\n\n"
+        "⚠️ *Diqqat!* Kanalni qo‘shishdan oldin botni admin qiling!"
+        
+    )
+    await state.set_state(ChannelAddState.waiting_for_channel)
 
+@router.message(ChannelAddState.waiting_for_channel)
+async def process_channel_username(message: types.Message, state: FSMContext):
+    channel_username = message.text.strip()
+    channels_worksheet = client.open("CRM").worksheet("Channels")
+    if not channel_username.startswith("@"):
+        await message.answer("❌ Iltimos, kanal username'ini to‘g‘ri formatda yuboring! Masalan: `@YourChannel`")
+        return
+
+    try:
+        # Google Sheets'ga qo‘shish
+        channels_worksheet.append_row([channel_username])
+
+        await message.answer("✅ Kanal muvaffaqiyatli qo‘shildi!")
+        await state.clear()
+
+    except Exception as e:
+        await message.answer(f"❌ Xatolik yuz berdi: {e}")
+        await state.clear()
 
 # Handler for University Statistics
 @router.message(lambda message: message.text == "📊 Universited statistikasi")
