@@ -37,13 +37,18 @@ worksheet = client.open(SPREADSHEET_NAME).worksheet("Users")
 
 
 def get_channels():
+    """
+    Google Sheets CRM faylidan kanallar ro'yxatini oladi
+    
+    Returns:
+        list: Kanallar ro'yxati
+    """
     channels = client.open("CRM").worksheet("Channels")
     channels_data = channels.get_all_values()
     lists = []
     for row in channels_data:
         lists.append(row[0])
     return lists
-
 
 
 def check_user_exists(telegram_id):
