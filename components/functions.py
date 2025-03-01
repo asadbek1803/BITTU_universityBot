@@ -36,6 +36,16 @@ SPREADSHEET_NAME = "CRM"
 worksheet = client.open(SPREADSHEET_NAME).worksheet("Users")
 
 
+def get_channels():
+    channels = client.open("CRM").worksheet("Channels")
+    channels_data = channels.get_all_values()
+    lists = []
+    for row in channels_data:
+        lists.append(row[0])
+    return lists
+
+
+
 def check_user_exists(telegram_id):
     """Foydalanuvchi mavjudligini tekshirish"""
     users = worksheet.get_all_values()
