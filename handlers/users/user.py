@@ -2,6 +2,7 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
 import gspread
+import pytz
 from components.functions import get_user_info, get_user_student
 from components.datetime import get_tashkent_time
 from environs import Env
@@ -17,11 +18,8 @@ creds = Credentials.from_service_account_info(GOOGLE_CREDENTIALS, scopes=SCOPES)
 client = gspread.authorize(creds)
 
 
-
 # User session storage
 user_sessions = {}
-
-
 
 
 @router.message(lambda message: message.text == "🟢 Keldim")
@@ -66,7 +64,7 @@ async def user_check_in(message: types.Message):
 async def user_check_out(message: types.Message):
     worksheet = client.open("CRM").worksheet("Attends")
     telegram_id = str(message.from_user.id)
-    now = get_tashkent_time()
+    now = get_tashkent_time()  # This is now timezone-aware
     today_date = now.strftime("%Y-%m-%d")
     check_out_time = now.strftime("%H:%M")  # Current time (hour:minute)
     full_time = f"{today_date} {check_out_time}"
@@ -88,8 +86,11 @@ async def user_check_out(message: types.Message):
                 row_number = i
                 check_in_full = row[3]  # Full timestamp "YYYY-MM-DD HH:MM"
                 try:
-                    # Parse the check-in datetime
-                    check_in_datetime = datetime.strptime(check_in_full, "%Y-%m-%d %H:%M")
+                    # Parse the check-in datetime and make it timezone aware
+                    naive_datetime = datetime.strptime(check_in_full, "%Y-%m-%d %H:%M")
+                    # Make the datetime timezone-aware with Tashkent timezone
+                    tashkent_tz = pytz.timezone('Asia/Tashkent')
+                    check_in_datetime = tashkent_tz.localize(naive_datetime)
                     # Extract just the time part for comparison
                     check_in_time = check_in_full.split(" ")[1] if " " in check_in_full else "00:00"
                 except (ValueError, IndexError):
@@ -114,7 +115,11 @@ async def user_check_out(message: types.Message):
         # Fallback to time string comparison - less accurate but better than nothing
         try:
             time_format = "%H:%M"
-            tdelta = datetime.strptime(check_out_time, time_format) - datetime.strptime(check_in_time, time_format)
+            # Create naive datetimes for time comparison
+            checkout_naive = datetime.strptime(check_out_time, time_format)
+            checkin_naive = datetime.strptime(check_in_time, time_format)
+            # Calculate difference (both are naive now)
+            tdelta = checkout_naive - checkin_naive
             duration = round(tdelta.total_seconds() / 3600, 1)  # Duration in hours
             
             # If duration is negative (e.g., check-out on the next day), make it positive
@@ -165,10 +170,12 @@ async def user_statistics(message: types.Message):
         try:
             if len(row) > 3 and row[3]:  # ArrivalTime column
                 # Parse date from "YYYY-MM-DD HH:MM" format
-                arrival_time = datetime.strptime(row[3], "%Y-%m-%d %H:%M")
-                if arrival_time.year == current_year:
+                # Create naive datetime first
+                naive_arrival = datetime.strptime(row[3], "%Y-%m-%d %H:%M")
+                # Don't need to make it timezone-aware just for comparison
+                if naive_arrival.year == current_year:
                     year_records.append(row)
-                    if arrival_time.month == current_month:
+                    if naive_arrival.month == current_month:
                         month_records.append(row)
         except (ValueError, TypeError):
             pass
