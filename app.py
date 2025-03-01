@@ -78,7 +78,7 @@ async def database_connected():
 
         # Users, Students, Groups, Attends, Lesson Weekday Times jadvallarini yaratish
         # (Create worksheets if they don't exist)
-        sheets = ["Users", "Students", "Groups", "Attends", "Lesson Weekday Times"]
+        sheets = ["Users", "Students", "Groups", "Attends", "Lesson Weekday Times", "Ideas"]
         existing_worksheets = [worksheet.title for worksheet in spreadsheet.worksheets()]
         
         for sheet_name in sheets:
