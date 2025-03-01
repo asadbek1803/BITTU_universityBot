@@ -49,7 +49,7 @@ def get_channels():
     lists = []
     
     # Birinchi qator (indeks 0) ni tashlab, qolgan barcha qatorlarni olish
-    for row in channels_data[2:]:  # 1-indeksdan boshlab oladi
+    for row in channels_data[1:]:  # 1-indeksdan boshlab oladi
         if row and row[0]:  # Bo'sh qatorlarni tekshirish
             lists.append(row[0])
     
