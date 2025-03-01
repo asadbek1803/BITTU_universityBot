@@ -179,7 +179,7 @@ class SubscriptionMiddleware(BaseMiddleware):
             # Maxfiy havola tekshirish
             if channel.startswith("https://t.me/+"):
                 # Maxfiy havolalar uchun so'rov yuborish imkoni yo'q
-                return False
+                return True
                 
             # Kanalning username qismini olish
             channel_username = channel
