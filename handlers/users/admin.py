@@ -69,9 +69,7 @@ async def add_channel_command(message: types.Message, state: FSMContext):
 async def process_channel_username(message: types.Message, state: FSMContext):
     channel_username = message.text.strip()
     channels_worksheet = client.open("CRM").worksheet("Channels")
-    if not channel_username.startswith("@"):
-        await message.answer("❌ Iltimos, kanal username'ini to‘g‘ri formatda yuboring! Masalan: `@YourChannel`")
-        return
+    
 
     try:
         # Google Sheets'ga qo‘shish
