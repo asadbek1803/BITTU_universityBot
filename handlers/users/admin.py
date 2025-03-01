@@ -58,7 +58,7 @@ async def add_channel_for_subscribe(message: types.Message):
     await message.answer(text="🌐Kanal usernameini yuboring \n\n\nMisol uchun @None\n\n⚠️Kanalni linkini kiritishdan oldin kanalga admin sifatida qo'shin!")
     data = message.text
 
-    channels.add_rows([data, "Channel"])
+    channels.add_rows([data])
 
     await bot.send_message(chat_id=message.from_user.id, text = "✅ Kanal muvaffiqiyatli saqlandi")
 
