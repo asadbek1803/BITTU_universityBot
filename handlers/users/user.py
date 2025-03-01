@@ -7,7 +7,7 @@ from components.functions import get_user_info, get_user_student
 from components.datetime import get_tashkent_time
 from environs import Env
 from components.credentials import GOOGLE_CREDENTIALS, SCOPES
-from states.users import SettingsStates
+from states.users import SettingsStates, UserIdeas
 from google.oauth2.service_account import Credentials
 from keyboards.reply.user import create_settings_keyboard, create_back_keyboard, create_main_keyboard, create_notification_settings_keyboard
 
@@ -20,6 +20,38 @@ client = gspread.authorize(creds)
 
 # User session storage
 user_sessions = {}
+
+
+@router.message(lambda message: message.text == "📝 Taklif berish")
+async def write_ideas_to_admin(message: types.Message, state: FSMContext):
+    telegram_id = message.from_user.id
+    worksheet = client.open("CRM").worksheet("Ideas")
+    full_name, phone = get_user_info(telegram_id)
+
+    if not full_name:
+        await message.answer("❗ Siz tizimda ro'yxatdan o'tmagansiz. Admin bilan bog'laning.")
+        return
+
+    if not get_user_student(telegram_id):
+        await message.answer("⛔ Siz taklif kirita olmaysiz yoki adminlar tekshirshyapti...")
+        return
+
+    await message.answer("✍ Iltimos, taklifingizni yozing:")
+    await state.set_state(UserIdeas.idea)
+
+@router.message(UserIdeas.idea)
+async def save_idea(message: types.Message, state: FSMContext):
+    telegram_id = message.from_user.id
+    worksheet = client.open("CRM").worksheet("Ideas")
+    full_name, phone = get_user_info(telegram_id)
+
+    # Taklifni Google Sheets'ga yozish
+    worksheet.append_row([full_name, message.text])
+
+    await message.answer("✅ Taklifingiz qabul qilindi! Rahmat! 😊")
+    await state.clear()
+    
+    
 
 
 @router.message(lambda message: message.text == "🟢 Keldim")

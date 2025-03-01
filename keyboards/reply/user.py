@@ -6,7 +6,7 @@ from aiogram import types
 kb = [
          
             [types.KeyboardButton(text="🟢 Keldim"), types.KeyboardButton(text="🔴 Ketdim")],
-            [types.KeyboardButton(text="📊 Statistika")],
+            [types.KeyboardButton(text="📊 Statistika"), types.KeyboardButton(text="📝 Taklif berish")],
             [types.KeyboardButton(text="⚙️ Sozlamalar")]
         
     ]
@@ -22,7 +22,7 @@ def create_main_keyboard():
     return types.ReplyKeyboardMarkup(
         keyboard=[
             [types.KeyboardButton(text="🟢 Keldim"), types.KeyboardButton(text="🔴 Ketdim")],
-            [types.KeyboardButton(text="📊 Statistika")],
+            [types.KeyboardButton(text="📊 Statistika"), types.KeyboardButton(text="📝 Taklif berish")],
             [types.KeyboardButton(text="⚙️ Sozlamalar")]
         ],
         resize_keyboard=True
