@@ -56,12 +56,12 @@ async def get_crm_link_handler(message: types.Message):
 async def add_channel_for_subscribe(message: types.Message):
     channels = client.open("CRM").worksheet("Channels")
     await message.answer(text="🌐Kanal usernameini yuboring \n\n\nMisol uchun @None\n\n⚠️Kanalni linkini kiritishdan oldin kanalga admin sifatida qo'shin!")
-    data = await message.text
+    data = message.text
 
     channels.add_rows([data, "Channel"])
 
     await bot.send_message(chat_id=message.from_user.id, text = "✅ Kanal muvaffiqiyatli saqlandi")
-    
+
 
 # Handler for University Statistics
 @router.message(lambda message: message.text == "📊 Universited statistikasi")
