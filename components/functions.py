@@ -38,7 +38,8 @@ worksheet = client.open(SPREADSHEET_NAME).worksheet("Users")
 
 def get_channels():
     """
-    Google Sheets CRM faylidan kanallar ro'yxatini oladi
+    Google Sheets CRM faylidan kanallar ro'yxatini oladi.
+    Birinchi qator (sarlavha qator) tashqari barcha qatorlarni oladi.
     
     Returns:
         list: Kanallar ro'yxati
@@ -46,8 +47,12 @@ def get_channels():
     channels = client.open("CRM").worksheet("Channels")
     channels_data = channels.get_all_values()
     lists = []
-    for row in channels_data:
-        lists.append(row[0])
+    
+    # Birinchi qator (indeks 0) ni tashlab, qolgan barcha qatorlarni olish
+    for row in channels_data[2:]:  # 1-indeksdan boshlab oladi
+        if row and row[0]:  # Bo'sh qatorlarni tekshirish
+            lists.append(row[0])
+    
     return lists
 
 
