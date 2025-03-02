@@ -56,6 +56,57 @@ async def get_crm_link_handler(message: types.Message):
 class ChannelAddState(StatesGroup):
     waiting_for_channel = State()
 
+
+class ChannelDeleteState(StatesGroup):
+    waiting_for_channel_number = State()
+    
+
+@router.message(lambda message: message.text == "🗑️ Kanal o'chirish")  # "/delete_channel" buyrug'i bilan ishga tushadi
+async def delete_channel_command(message: types.Message, state: FSMContext):
+    # Barcha kanalllarni Google Sheets'dan olish
+    channels_worksheet = client.open("CRM").worksheet("Channels")
+    channels_data = channels_worksheet.get_all_values()
+    
+    if not channels_data:
+        await message.answer("❌ Kanallar ro'yxati bo'sh!")
+        return
+    
+    # Kanallar ro'yhatini tayyorlash
+    channels_list = "\n".join([f"{i+1}. {channel[0]}" for i, channel in enumerate(channels_data)])
+    
+    await message.answer(
+        f"📋 Mavjud kanallar ro'yxati:\n\n{channels_list}\n\n"
+        "🔢 O'chirmoqchi bo'lgan kanalingiz raqamini yuboring."
+    )
+    await state.set_state(ChannelDeleteState.waiting_for_channel_number)
+
+@router.message(ChannelDeleteState.waiting_for_channel_number)
+async def process_channel_deletion(message: types.Message, state: FSMContext):
+    try:
+        selected_index = int(message.text.strip()) - 1
+        channels_worksheet = client.open("CRM").worksheet("Channels")
+        channels_data = channels_worksheet.get_all_values()
+        
+        if selected_index < 0 or selected_index >= len(channels_data):
+            await message.answer("❌ Noto'g'ri raqam kiritildi! Qaytadan urinib ko'ring.")
+            return
+        
+        deleted_channel = channels_data[selected_index][0]
+        
+        # Kanalni o'chirish
+        channels_worksheet.delete_rows(selected_index + 1)
+        
+        await message.answer(f"✅ Kanal {deleted_channel} muvaffaqiyatli o'chirildi!")
+        await state.clear()
+        
+    except ValueError:
+        await message.answer("❌ Iltimos, faqat raqam kiriting!")
+    except Exception as e:
+        await message.answer(f"❌ Xatolik yuz berdi: {e}")
+        await state.clear()
+
+
+
 @router.message(lambda message: message.text == "🔗 Kanal qo'shish")  # "/add_channel" buyrug‘i bilan ishga tushadi
 async def add_channel_command(message: types.Message, state: FSMContext):
     await message.answer(
