@@ -11,14 +11,15 @@ class SubscriptionMiddleware(BaseMiddleware):
     Aiogram 3.x uchun majburiy obuna middleware
     """
     
-    def __init__(self, channels: List[Dict[str, str]]) -> None:
+    def __init__(self, channels: List[str]) -> None:
         """
         Middleware ni ishga tushirish
         
-        :param channels: Kanallar ro'yxati, har bir kanal uchun 'chat_id' va 'title'
-        Masalan: [{'chat_id': '@example', 'title': 'Example Channel'}, ...]
+        :param channels: Kanallar usernamelari ro'yxati
+        Masalan: ['example', 'channel2', 'mychannel']
         """
-        self.channels = channels
+        # Ensure all channels start with @
+        self.channels = [f"@{channel.replace('@', '')}" for channel in channels]
         super().__init__()
     
     async def __call__(
@@ -65,7 +66,7 @@ class SubscriptionMiddleware(BaseMiddleware):
             # Handler ni chaqirmaslik
             return None
     
-    async def _check_subscriptions(self, user_id: int, bot) -> List[Dict[str, str]]:
+    async def _check_subscriptions(self, user_id: int, bot) -> List[str]:
         """
         Foydalanuvchi barcha kanallarga obuna bo'lganligini tekshirish
         
@@ -87,7 +88,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         
         return not_subscribed
     
-    def _create_channels_markup(self, channels: List) -> InlineKeyboardMarkup:
+    def _create_channels_markup(self, channels: List[str]) -> InlineKeyboardMarkup:
         """
         Kanallar uchun inline tugmalar yaratish
         
