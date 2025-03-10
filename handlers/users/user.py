@@ -6,7 +6,7 @@ import pytz
 from components.functions import get_user_info, get_user_student
 from components.datetime import get_tashkent_time
 from environs import Env
-from components.credentials import GOOGLE_CREDENTIALS, SCOPES
+from components.credentials import GOOGLE_CREDENTIALS, SCOPES, SPREAD_SHEET_ID
 from states.users import SettingsStates, UserIdeas
 from google.oauth2.service_account import Credentials
 from keyboards.reply.user import create_settings_keyboard, create_back_keyboard, create_main_keyboard, create_notification_settings_keyboard
@@ -25,7 +25,7 @@ user_sessions = {}
 @router.message(lambda message: message.text == "📝 Taklif berish")
 async def write_ideas_to_admin(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
-    worksheet = client.open("CRM").worksheet("Ideas")
+    worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Ideas")
     full_name, phone = get_user_info(telegram_id)
 
     if not full_name:
@@ -42,7 +42,7 @@ async def write_ideas_to_admin(message: types.Message, state: FSMContext):
 @router.message(UserIdeas.idea)
 async def save_idea(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
-    worksheet = client.open("CRM").worksheet("Ideas")
+    worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Ideas")
     full_name, phone = get_user_info(telegram_id)
 
     # Taklifni Google Sheets'ga yozish
@@ -56,7 +56,7 @@ async def save_idea(message: types.Message, state: FSMContext):
 
 @router.message(lambda message: message.text == "🟢 Keldim")
 async def user_check_in(message: types.Message):
-    worksheet = client.open("CRM").worksheet("Attends")
+    worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Attends")
     telegram_id = str(message.from_user.id)
     full_name, phone = get_user_info(telegram_id)
 
@@ -179,7 +179,7 @@ async def user_check_out(message: types.Message):
 
 @router.message(lambda message: message.text == "📊 Statistika")
 async def user_statistics(message: types.Message):
-    worksheet = client.open("CRM").worksheet("Attends")
+    worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Attends")
     telegram_id = str(message.from_user.id)
     all_records = worksheet.get_all_values()
     
@@ -347,7 +347,7 @@ async def process_phone_change(message: types.Message, state: FSMContext):
         return
     
     # Update phone in database or sheet
-    users_worksheet = client.open("CRM").worksheet("Users")
+    users_worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Users")
     user_cells = users_worksheet.findall(telegram_id)
     
     if user_cells:
@@ -389,7 +389,7 @@ async def toggle_daily_reminders(message: types.Message, state: FSMContext):
     telegram_id = str(message.from_user.id)
     
     # Find user settings in a separate settings worksheet or add a column to users
-    users_worksheet = client.open("CRM").worksheet("Users")
+    users_worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Users")
     user_cells = users_worksheet.findall(telegram_id)
     
     if user_cells:
