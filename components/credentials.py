@@ -21,3 +21,5 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
+
+SPREAD_SHEET_ID = env.str("SPREAD_SHEET_ID")

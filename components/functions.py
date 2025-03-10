@@ -1,5 +1,4 @@
-
-
+from components.credentials import SPREAD_SHEET_ID
 import gspread
 from google.oauth2.service_account import Credentials
 from environs import Env
@@ -33,7 +32,8 @@ GOOGLE_CREDENTIALS = {
 creds = Credentials.from_service_account_info(GOOGLE_CREDENTIALS, scopes=SCOPES)
 client = gspread.authorize(creds)
 SPREADSHEET_NAME = "CRM"
-worksheet = client.open(SPREADSHEET_NAME).worksheet("Users")
+
+worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Users")
 
 
 def get_channels():
@@ -44,7 +44,7 @@ def get_channels():
     Returns:
         list: Kanallar ro'yxati
     """
-    channels = client.open("CRM").worksheet("Channels")
+    channels = client.open_by_key(SPREAD_SHEET_ID).worksheet("Channels")
     channels_data = channels.get_all_values()
     lists = []
     
