@@ -5,7 +5,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from loader import bot
 from keyboards.reply.user import user_menu
 from keyboards.reply.admin import admin_buttons
-from components.credentials import GOOGLE_CREDENTIALS, SCOPES
+from components.credentials import GOOGLE_CREDENTIALS, SCOPES, SPREAD_SHEET_ID
 import gspread
 from components.datetime import get_tashkent_time
 from components.functions import check_user_exists, check_user_status
@@ -19,7 +19,7 @@ router = Router()
 creds = Credentials.from_service_account_info(GOOGLE_CREDENTIALS, scopes=SCOPES)
 client = gspread.authorize(creds)
 SPREADSHEET_NAME = "CRM"
-worksheet = client.open(SPREADSHEET_NAME).worksheet("Users")
+worksheet = client.open_by_key(SPREAD_SHEET_ID).worksheet("Users")
 
 
 
@@ -54,7 +54,7 @@ async def phone_received(message: types.Message, state: FSMContext):
 
     await message.answer("Endi ism-familiyangizni kiriting ✍️")
     await state.set_state(RegistrationState.waiting_for_fullname)
-    
+
 
 @router.message(RegistrationState.waiting_for_fullname)
 async def fullname_received(message: types.Message, state: FSMContext):
