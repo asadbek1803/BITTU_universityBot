@@ -1,18 +1,14 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.enums.parse_mode import ParseMode
 from loader import bot
 from keyboards.reply.user import user_menu
 from keyboards.reply.admin import admin_buttons
-from datetime import datetime
 from components.credentials import GOOGLE_CREDENTIALS, SCOPES
 import gspread
-from middlewares.SubscriptionMiddleware import SubscriptionMiddleware
 from components.datetime import get_tashkent_time
-from components.functions import check_user_exists, check_user_status, get_channels
+from components.functions import check_user_exists, check_user_status
 from states.registration import RegistrationState
 from google.oauth2.service_account import Credentials
 
@@ -58,7 +54,7 @@ async def phone_received(message: types.Message, state: FSMContext):
 
     await message.answer("Endi ism-familiyangizni kiriting ✍️")
     await state.set_state(RegistrationState.waiting_for_fullname)
-
+    
 
 @router.message(RegistrationState.waiting_for_fullname)
 async def fullname_received(message: types.Message, state: FSMContext):
@@ -80,26 +76,3 @@ async def fullname_received(message: types.Message, state: FSMContext):
     
     # State ni tozalash
     await state.clear()
-
-# Tekshirish callback i uchun handler
-@router.callback_query(lambda c: c.data == "check_subscription")
-async def check_subscription_callback(callback: types.CallbackQuery):
-    # Middlewareni yaratib, tekshirish metodini ishlatish
-    middleware = SubscriptionMiddleware(get_channels())
-    
-    # Foydalanuvchi barcha kanallarga obuna bo'lganligini tekshirish
-    not_subscribed = await middleware._check_subscriptions(callback.from_user.id, callback.bot)
-    
-    if not not_subscribed:
-        await callback.message.edit_text("✅ Tabriklaymiz! Siz barcha kanallarga obuna bo'ldingiz. Endi botdan to'liq foydalanishingiz mumkin.")
-        # Bu yerda asosiy menuni ko'rsatishingiz mumkin
-    else:
-        # Qolgan kanallar uchun yangi markup yaratish
-        markup = middleware._create_channels_markup(not_subscribed)
-        await callback.message.edit_text(
-            "⚠️ Siz hali barcha kanallarga obuna bo'lmagansiz. Quyidagi kanallarga obuna bo'ling:",
-            reply_markup=markup
-        )
-    
-    await callback.answer()
-    
